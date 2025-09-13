@@ -75,7 +75,7 @@ public abstract class Enumeration<TEnum> : IEquatable<Enumeration<TEnum>>, IComp
 
     public override int GetHashCode() => Value.GetHashCode();
 
-    private static IEnumerable<TEnum> GetAllEnumerationOptions()
+    private static List<TEnum> GetAllEnumerationOptions()
     {
         Type enumType = typeof(TEnum);
 

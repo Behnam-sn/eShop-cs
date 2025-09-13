@@ -1,4 +1,4 @@
-﻿using Application.Products.CreateProduct;
+using Application.Products.CreateProduct;
 using Application.Products.GetProducts;
 using Carter;
 using Domain.Shared;
@@ -8,20 +8,25 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 
-namespace Presentation;
+namespace Presentation.Products;
 
-public class ProductsModule : ICarterModule
+public class ProductsModule : CarterModule
 {
-    public void AddRoutes(IEndpointRouteBuilder app)
+    public ProductsModule()
+        : base("/products")
     {
-        app.MapGet("/products", async (ISender sender) =>
+    }
+
+    public override void AddRoutes(IEndpointRouteBuilder app)
+    {
+        app.MapGet("/", async (ISender sender) =>
         {
             Result<List<ProductResponse>> result = await sender.Send(new GetProductsQuery());
 
             return Results.Ok(result.Value);
         });
 
-        app.MapPost("/products", async (CreateProductRequest request, ISender sender) =>
+        app.MapPost("/", async (CreateProductRequest request, ISender sender) =>
         {
             CreateProductCommand command = request.Adapt<CreateProductCommand>();
 
@@ -31,8 +36,3 @@ public class ProductsModule : ICarterModule
         });
     }
 }
-
-public sealed record CreateProductRequest(
-    string Name,
-    decimal Price,
-    List<string> Tags);

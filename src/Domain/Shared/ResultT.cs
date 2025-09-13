@@ -15,8 +15,10 @@ public class Result<TValue> : Result
     /// <param name="isSuccess">The flag indicating if the result is successful.</param>
     /// <param name="error">The error.</param>
     protected internal Result(TValue? value, bool isSuccess, Error error)
-        : base(isSuccess, error) =>
+        : base(isSuccess, error)
+    {
         _value = value;
+    }
 
     /// <summary>
     /// Gets the result value if the result is successful, otherwise throws an exception.

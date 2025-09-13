@@ -1,6 +1,7 @@
 using Application;
 using Application.Products.CreateProduct;
 using Application.Products.GetProducts;
+using Carter;
 using Domain.Shared;
 using Mapster;
 using Marten;
@@ -11,6 +12,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddCarter();
 
 builder.Services.AddMarten(options =>
 {
@@ -27,21 +30,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.MapGet("/products", async (ISender sender) =>
-{
-    Result<List<ProductResponse>> result = await sender.Send(new GetProductsQuery());
-
-    return Results.Ok(result.Value);
-});
-
-app.MapPost("/products", async (CreateProductRequest request, ISender sender) =>
-{
-    CreateProductCommand command = request.Adapt<CreateProductCommand>();
-
-    await sender.Send(command);
-
-    return Results.Ok();
-});
+app.MapCarter();
 
 app.UseHttpsRedirection();
 
