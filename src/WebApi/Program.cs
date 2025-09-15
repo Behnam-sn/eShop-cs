@@ -1,18 +1,31 @@
 using Application;
-using Application.Products.CreateProduct;
-using Application.Products.GetProducts;
 using Carter;
+using Domain.Outbox;
 using Domain.Products;
-using Domain.Shared;
-using Mapster;
 using Marten;
 using MediatR;
-using Presentation;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddOptions<OutboxSettings>()
+    .BindConfiguration("Outbox")
+    .ValidateDataAnnotations()
+    .Validate(settings =>
+    {
+        if (settings.IntervalInSeconds == 0)
+        {
+            return false;
+        }
+
+        return true;
+    })
+    .ValidateOnStart();
+
+builder.Services.AddSingleton(sp => sp.GetRequiredService<IOptions<OutboxSettings>>().Value);
 
 builder.Services.AddCarter();
 
