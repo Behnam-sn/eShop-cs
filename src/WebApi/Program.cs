@@ -2,6 +2,7 @@ using Application;
 using Application.Products.CreateProduct;
 using Application.Products.GetProducts;
 using Carter;
+using Domain.Products;
 using Domain.Shared;
 using Mapster;
 using Marten;
@@ -18,6 +19,7 @@ builder.Services.AddCarter();
 builder.Services.AddMarten(options =>
 {
     options.Connection(builder.Configuration.GetConnectionString("Database")!);
+    options.Schema.For<Product>().SoftDeleted();
 });
 
 builder.Services.AddMediatR(ApplicationAssembly.Instance);
