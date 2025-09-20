@@ -1,4 +1,5 @@
 using Application;
+using Application.Behaviors;
 using Carter;
 using Domain.Outbox;
 using Domain.Products;
@@ -36,6 +37,10 @@ builder.Services.AddMarten(options =>
 });
 
 builder.Services.AddMediatR(ApplicationAssembly.Instance);
+
+builder.Services.AddScoped(
+    typeof(IPipelineBehavior<,>),
+    typeof(LoggingPipelineBehavior<,>));
 
 WebApplication app = builder.Build();
 
