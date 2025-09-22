@@ -7,7 +7,7 @@ using Marten;
 namespace Application.Products.GetProducts;
 
 internal sealed class GetProductsCursorQueryHandler
-    : IQueryHandler<GetProductsCursorQuery, List<ProductResponse>>
+    : IQueryHandler<GetProductsCursorQuery, CursorResponse<List<ProductResponse>>>
 {
     private readonly IQuerySession _session;
 
@@ -16,7 +16,7 @@ internal sealed class GetProductsCursorQueryHandler
         _session = session;
     }
 
-    public async Task<Result<List<ProductResponse>>> Handle(GetProductsCursorQuery request, CancellationToken cancellationToken)
+    public async Task<Result<CursorResponse<List<ProductResponse>>>> Handle(GetProductsCursorQuery request, CancellationToken cancellationToken)
     {
         IReadOnlyList<ProductResponse> products = await _session
             .Query<Product>()
@@ -30,7 +30,7 @@ internal sealed class GetProductsCursorQueryHandler
             .OrderBy(p => p.Id)
             .ToListAsync(cancellationToken);
 
-        var cursor = products.Last().Id;
+        var cursor = products[^1].Id;
 
         var productResponses = products.Take(request.PageSize).ToList();
 

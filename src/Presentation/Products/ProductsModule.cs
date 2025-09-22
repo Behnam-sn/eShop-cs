@@ -1,3 +1,4 @@
+using Application.Abstractions;
 using Application.Products.CreateProduct;
 using Application.Products.DeleteProduct;
 using Application.Products.GetProducts;
@@ -35,7 +36,7 @@ public class ProductsModule : CarterModule
         {
             var command = new GetProductsCursorQuery(cursor, pageSize);
 
-            Result<List<ProductResponse>> result = await sender.Send(command);
+            Result<CursorResponse<List<ProductResponse>>> result = await sender.Send(command);
 
             return Results.Ok(result.Value);
         });
