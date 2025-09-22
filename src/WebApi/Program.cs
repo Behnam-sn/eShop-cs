@@ -1,9 +1,13 @@
 using Application;
+using Application.Abstractions.EventBus;
 using Application.Behaviors;
+using Application.Products.CreateProduct;
 using Carter;
 using Domain.Outbox;
 using Domain.Products;
+using Infrastructure.MessageBroker;
 using Marten;
+using MassTransit;
 using MediatR;
 using Microsoft.Extensions.Options;
 
@@ -35,6 +39,30 @@ builder.Services.AddMarten(options =>
     options.Connection(builder.Configuration.GetConnectionString("Database")!);
     options.Schema.For<Product>().SoftDeleted();
 });
+
+builder.Services.Configure<MessageBrokerSettings>(builder.Configuration.GetSection("MessageBroker"));
+
+builder.Services.AddSingleton(sp => sp.GetRequiredService<IOptions<MessageBrokerSettings>>().Value);
+
+builder.Services.AddMassTransit(busConfigurator =>
+{
+    busConfigurator.SetKebabCaseEndpointNameFormatter();
+
+    busConfigurator.AddConsumer<ProductCreatedEventConsumer>();
+
+    busConfigurator.UsingRabbitMq((context, configurator) =>
+    {
+        var settings = context.GetRequiredService<MessageBrokerSettings>();
+
+        configurator.Host(new Uri(settings.Host), h =>
+        {
+            h.Username(settings.Username);
+            h.Password(settings.Password);
+        });
+    });
+});
+
+builder.Services.AddScoped<IEventBus, EventBus>();
 
 builder.Services.AddMediatR(ApplicationAssembly.Instance);
 
