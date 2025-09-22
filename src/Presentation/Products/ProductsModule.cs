@@ -22,9 +22,20 @@ public class ProductsModule : CarterModule
 
     public override void AddRoutes(IEndpointRouteBuilder app)
     {
-        app.MapGet("/", async (ISender sender) =>
+        app.MapGet("/", async (int page, int pageSize, ISender sender) =>
         {
-            Result<List<ProductResponse>> result = await sender.Send(new GetProductsQuery());
+            var command = new GetProductsQuery(page, pageSize);
+
+            Result<List<ProductResponse>> result = await sender.Send(command);
+
+            return Results.Ok(result.Value);
+        });
+
+        app.MapGet("/", async (int cursor, int pageSize, ISender sender) =>
+        {
+            var command = new GetProductsCursorQuery(cursor, pageSize);
+
+            Result<List<ProductResponse>> result = await sender.Send(command);
 
             return Results.Ok(result.Value);
         });
