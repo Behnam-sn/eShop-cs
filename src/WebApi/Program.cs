@@ -1,10 +1,12 @@
 using Application;
+using Application.Abstractions.Caching;
 using Application.Abstractions.EventBus;
 using Application.Behaviors;
 using Application.Products.CreateProduct;
 using Carter;
 using Domain.Outbox;
 using Domain.Products;
+using Infrastructure.Caching;
 using Infrastructure.MessageBroker;
 using Marten;
 using MassTransit;
@@ -69,6 +71,9 @@ builder.Services.AddMediatR(ApplicationAssembly.Instance);
 builder.Services.AddScoped(
     typeof(IPipelineBehavior<,>),
     typeof(LoggingPipelineBehavior<,>));
+
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddScoped<ICacheService, CacheService>();
 
 WebApplication app = builder.Build();
 
