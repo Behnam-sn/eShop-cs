@@ -7,29 +7,29 @@ public class Order
 {
     private readonly HashSet<LineItem> lineItems = new();
 
-    private Order(Guid id, Guid customerId)
+    private Order(OrderId id, CustomerId customerId)
     {
         Id = id;
         CustomerId = customerId;
     }
 
-    public Guid Id { get; private set; }
+    public OrderId Id { get; private set; }
 
-    public Guid CustomerId { get; private set; }
+    public CustomerId CustomerId { get; private set; }
 
     public static Order Create(Customer customer)
     {
-        var order = new Order(id: Guid.NewGuid(), customerId: customer.Id);
+        var order = new Order(id: new OrderId(Guid.NewGuid()), customerId: customer.Id);
         return order;
     }
 
-    public void Add(Product product)
+    public void Add(ProductId productId, Money price)
     {
         var lineItem = new LineItem(
-            id: Guid.NewGuid(),
+            id: new LineItemId(Guid.NewGuid()),
             orderId: Id,
-            productId: product.Id,
-            price: product.Price);
+            productId: productId,
+            price: price);
 
         lineItems.Add(lineItem);
     }
