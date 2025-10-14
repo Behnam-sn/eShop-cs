@@ -5,7 +5,7 @@ namespace Domain.Orders;
 
 public class Order
 {
-    private readonly HashSet<LineItem> lineItems = new();
+    private readonly HashSet<LineItem> _lineItems = new();
 
     private Order(OrderId id, CustomerId customerId)
     {
@@ -23,7 +23,7 @@ public class Order
         return order;
     }
 
-    public void Add(ProductId productId, Money price)
+    public void AddLineItem(ProductId productId, Money price)
     {
         var lineItem = new LineItem(
             id: new LineItemId(Guid.NewGuid()),
@@ -31,6 +31,6 @@ public class Order
             productId: productId,
             price: price);
 
-        lineItems.Add(lineItem);
+        _lineItems.Add(lineItem);
     }
 }
