@@ -17,6 +17,8 @@ public class Order
 
     public CustomerId CustomerId { get; private set; }
 
+    public IReadOnlyList<LineItem> LineItems => _lineItems.ToList();
+
     public static Order Create(Customer customer)
     {
         var order = new Order(id: new OrderId(Guid.NewGuid()), customerId: customer.Id);
