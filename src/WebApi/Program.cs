@@ -12,6 +12,7 @@ using Marten;
 using MassTransit;
 using MediatR;
 using Microsoft.Extensions.Options;
+using Presentation;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -72,6 +73,8 @@ builder.Services.AddMediatR(ApplicationAssembly.Instance);
 builder.Services.AddScoped(
     typeof(IPipelineBehavior<,>),
     typeof(LoggingPipelineBehavior<,>));
+
+builder.Services.AddPresentation(builder.Configuration);
 
 builder.Host.UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration));
 

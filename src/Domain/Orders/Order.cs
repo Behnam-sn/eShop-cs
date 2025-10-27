@@ -19,9 +19,9 @@ public class Order
 
     public IReadOnlyList<LineItem> LineItems => _lineItems.ToList();
 
-    public static Order Create(Customer customer)
+    public static Order Create(CustomerId customerId)
     {
-        var order = new Order(id: new OrderId(Guid.NewGuid()), customerId: customer.Id);
+        var order = new Order(id: new OrderId(Guid.NewGuid()), customerId: customerId);
         return order;
     }
 
