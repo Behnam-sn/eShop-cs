@@ -3,7 +3,7 @@ using Domain.Customers;
 using Domain.Orders;
 using Microsoft.EntityFrameworkCore;
 
-namespace Presentation;
+namespace Persistence;
 
 public class ApplicationDbContext : DbContext, IApplicationDbContext
 {
