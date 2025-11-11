@@ -9,15 +9,17 @@ public sealed class CreateOrderCommandHandler : IRequestHandler<CreateOrderComma
 {
     private readonly IApplicationDbContext _context;
 
-    public CreateOrderCommandHandler(IApplicationDbContext context)
+    private readonly IPublisher _publisher;
+
+    public CreateOrderCommandHandler(IApplicationDbContext context, IPublisher publisher)
     {
         _context = context;
+        _publisher = publisher;
     }
 
     public async Task Handle(CreateOrderCommand request, CancellationToken cancellationToken)
     {
-        var customer = await _context.Customers.FindAsync(
-            new CustomerId(request.CustomerId));
+        var customer = await _context.Customers.FindAsync([new CustomerId(request.CustomerId)], cancellationToken: cancellationToken);
 
         if (customer is null)
         {
@@ -29,5 +31,7 @@ public sealed class CreateOrderCommandHandler : IRequestHandler<CreateOrderComma
         _context.Orders.Add(order);
 
         await _context.SaveChangesAsync(cancellationToken);
+
+        await _publisher.Publish(new OrderCreatedEvent(order.Id), cancellationToken);
     }
 }
