@@ -25,9 +25,9 @@ public sealed class GetOrderQueryHandler : IRequestHandler<GetOrderQuery, OrderR
         var orderResponse = orderSummaries
             .GroupBy(o => o.OrderId)
             .Select(grp => new OrderResponse(
-                grp.key,
+                grp.Key,
                 grp.First().CustomerId,
-                grp.Select(o => new LineItemResponse((o.LineItemId, o.LineItemPrice)).ToList())))
+                grp.Select(o => new LineItemResponse(o.LineItemId, o.LineItemPrice)).ToList()))
             .Single();
 
         return orderResponse;

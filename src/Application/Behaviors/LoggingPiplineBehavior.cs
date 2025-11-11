@@ -20,7 +20,7 @@ public class LoggingPipelineBehavior<TRequest, TResponse> : IPipelineBehavior<TR
         var requestName = typeof(TRequest).Name;
         _logger.LogInformation("Starting request {@RequestName}, {@DateTimeUtc}", requestName, DateTime.UtcNow);
 
-        var result = await next();
+        var result = await next(cancellationToken);
 
         if (result.IsFailure)
         {
