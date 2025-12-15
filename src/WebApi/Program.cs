@@ -2,6 +2,7 @@ using Application;
 using Application.Abstractions.Caching;
 using Application.Abstractions.EventBus;
 using Application.Behaviors;
+using Application.Orders.Create;
 using Application.Products.CreateProduct;
 using Carter;
 using Domain.Outbox;
@@ -13,7 +14,9 @@ using MassTransit;
 using MediatR;
 using Microsoft.Extensions.Options;
 using Persistence;
-using Presentation;
+using Rebus;
+using Rebus.Config;
+using Rebus.Routing.TypeBased;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -81,6 +84,24 @@ builder.Host.UseSerilog((context, configuration) => configuration.ReadFrom.Confi
 
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddScoped<ICacheService, CacheService>();
+
+builder.Services.AddRebus(
+    rebus => rebus
+        .Routing(r => r.TypeBased().MapAssemblyOf<ApplicationAssemblyReference>("eshop-queue"))
+        .Transport(t => t.UseRabbitMq(
+            builder.Configuration.GetConnectionString("MessageBroker"),
+            "eshop-queue"))
+        .Sagas(s => s.StoreInPostgres(
+            builder.Configuration.GetConnectionString("Database"),
+            "sagas",
+            "sagas_indexes")),
+    onCreated: async bus =>
+    {
+        await bus.Subscribe<OrderConfirmationEmailSent>();
+        await bus.Subscribe<OrderPaymentRequestSent>();
+    });
+
+builder.Services.AutoRegisterHandlersFromAssemblyOf<ApplicationAssemblyReference>();
 
 WebApplication app = builder.Build();
 

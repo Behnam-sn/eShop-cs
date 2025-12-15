@@ -2,20 +2,21 @@
 using Domain.Customers;
 using Domain.Orders;
 using MediatR;
+using Rebus.Bus;
 
 namespace Application.Orders.Create;
 
 public sealed class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand>
 {
-    private readonly IPublisher _publisher;
+    private readonly IBus _bus;
 
     private readonly IRepository<Customer> _customerRepository;
 
     private readonly IRepository<Order> _orderRepository;
 
-    public CreateOrderCommandHandler(IPublisher publisher, IRepository<Customer> customerRepository, IRepository<Order> orderRepository)
+    public CreateOrderCommandHandler(IBus bus, IRepository<Customer> customerRepository, IRepository<Order> orderRepository)
     {
-        _publisher = publisher;
+        _bus = bus;
         _customerRepository = customerRepository;
         _orderRepository = orderRepository;
     }
@@ -35,6 +36,6 @@ public sealed class CreateOrderCommandHandler : IRequestHandler<CreateOrderComma
 
         await _orderRepository.SaveChangesAsync();
 
-        await _publisher.Publish(new OrderCreatedEvent(order.Id), cancellationToken);
+        await _bus.Send(new OrderCreatedEvent(order.Id.Value));
     }
 }
