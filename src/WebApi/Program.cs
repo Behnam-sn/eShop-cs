@@ -14,7 +14,6 @@ using MassTransit;
 using MediatR;
 using Microsoft.Extensions.Options;
 using Persistence;
-using Rebus;
 using Rebus.Config;
 using Rebus.Routing.TypeBased;
 using Serilog;

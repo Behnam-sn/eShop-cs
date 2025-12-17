@@ -11,7 +11,10 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
 
     public DbSet<Order> Orders { get; set; }
 
+    public DbSet<OrderSummary> OrderSummaries { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) => optionsBuilder.UseNpgsql();
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder) => modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
+    protected override void OnModelCreating(ModelBuilder modelBuilder) =>
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
 }

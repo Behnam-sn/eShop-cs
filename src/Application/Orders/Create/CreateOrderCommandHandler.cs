@@ -14,11 +14,15 @@ public sealed class CreateOrderCommandHandler : IRequestHandler<CreateOrderComma
 
     private readonly IRepository<Order> _orderRepository;
 
-    public CreateOrderCommandHandler(IBus bus, IRepository<Customer> customerRepository, IRepository<Order> orderRepository)
+    private readonly IRepository<OrderSummary> _orderSummaryRepository;
+
+    public CreateOrderCommandHandler(IBus bus, IRepository<Customer> customerRepository,
+        IRepository<Order> orderRepository, IRepository<OrderSummary> orderSummaryRepository)
     {
         _bus = bus;
         _customerRepository = customerRepository;
         _orderRepository = orderRepository;
+        _orderSummaryRepository = orderSummaryRepository;
     }
 
     public async Task Handle(CreateOrderCommand request, CancellationToken cancellationToken)
@@ -31,9 +35,10 @@ public sealed class CreateOrderCommandHandler : IRequestHandler<CreateOrderComma
         }
 
         var order = Order.Create(customer.Id);
+        var orderSummary = new OrderSummary(order.Id.Value, order.CustomerId.Value, 0);
 
         _orderRepository.Insert(order);
-
+        _orderSummaryRepository.Insert(orderSummary);
         await _orderRepository.SaveChangesAsync();
 
         await _bus.Send(new OrderCreatedEvent(order.Id.Value));
