@@ -4,6 +4,7 @@ using Domain.Products;
 using Domain.Shared;
 using Marten;
 using MassTransit;
+using MediatR;
 
 namespace Application.Products.CreateProduct;
 
@@ -14,10 +15,13 @@ internal sealed class CreateProductCommandHandler
 
     private readonly IEventBus _eventBus;
 
-    public CreateProductCommandHandler(IDocumentSession session, IEventBus eventBus)
+    private readonly IPublisher _publisher;
+
+    public CreateProductCommandHandler(IDocumentSession session, IEventBus eventBus, IPublisher publisher)
     {
         _session = session;
         _eventBus = eventBus;
+        _publisher = publisher;
     }
 
     public async Task<Result> Handle(CreateProductCommand request, CancellationToken cancellationToken)
@@ -33,8 +37,12 @@ internal sealed class CreateProductCommandHandler
 
         await _session.SaveChangesAsync(cancellationToken);
 
+        var productCreatedEvent = new ProductCreatedEvent(product.Id, product.Name, product.Price);
+
+        await _publisher.Publish(productCreatedEvent, cancellationToken);
+
         await _eventBus.PublishAsync(
-            new ProductCreatedEvent(product.Id, product.Name, product.Price),
+            productCreatedEvent,
             cancellationToken);
 
         return Result.Success();

@@ -2,6 +2,7 @@ using Application.Abstractions.Messaging;
 using Domain.Products;
 using Domain.Shared;
 using Marten;
+using MediatR;
 
 namespace Application.Products.DeleteProduct;
 
@@ -9,9 +10,12 @@ public sealed class DeleteProductCommandHandler : ICommandHandler<DeleteProductC
 {
     private readonly IDocumentSession _session;
 
-    public DeleteProductCommandHandler(IDocumentSession session)
+    private readonly IPublisher _publisher;
+
+    public DeleteProductCommandHandler(IDocumentSession session, IPublisher publisher)
     {
         _session = session;
+        _publisher = publisher;
     }
 
     public async Task<Result> Handle(DeleteProductCommand request, CancellationToken cancellationToken)
@@ -36,6 +40,9 @@ public sealed class DeleteProductCommandHandler : ICommandHandler<DeleteProductC
         _session.HardDelete(product);
 
         await _session.SaveChangesAsync(cancellationToken);
+
+        var productDeletedEvent = new ProductDeletedEvent(product.Id.Value);
+        await _publisher.Publish(productDeletedEvent, cancellationToken);
 
         return Result.Success();
     }

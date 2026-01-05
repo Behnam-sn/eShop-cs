@@ -2,6 +2,7 @@ using Application.Abstractions.Messaging;
 using Domain.Products;
 using Domain.Shared;
 using Marten;
+using MediatR;
 
 namespace Application.Products.UpdateProduct;
 
@@ -9,9 +10,12 @@ public sealed class UpdateProductCommandHandler : ICommandHandler<UpdateProductC
 {
     private readonly IDocumentSession _session;
 
-    public UpdateProductCommandHandler(IDocumentSession session)
+    private readonly IPublisher _publisher;
+
+    public UpdateProductCommandHandler(IDocumentSession session, IPublisher publisher)
     {
         _session = session;
+        _publisher = publisher;
     }
 
     public async Task<Result> Handle(UpdateProductCommand request, CancellationToken cancellationToken)
@@ -30,6 +34,9 @@ public sealed class UpdateProductCommandHandler : ICommandHandler<UpdateProductC
         _session.Update(product);
 
         await _session.SaveChangesAsync(cancellationToken);
+
+        var productUpdatedEvent = new ProductUpdatedEvent(product.Id.Value, product.Name, product.Price.Amount);
+        await _publisher.Publish(productUpdatedEvent, cancellationToken);
 
         return Result.Success();
     }
